@@ -1,9 +1,18 @@
 import math
+import numpy as np
 import torch
 from torch import nn
 import torch.nn.functional as F
 from modules.position_embedding import SinusoidalPositionalEmbedding
 from modules.multihead_attention import MultiheadAttention
+
+# fix random seed
+import random
+random.seed(0)
+np.random.seed(0)
+torch.random.manual_seed(0)
+torch.manual_seed(0)
+torch.cuda.manual_seed(0)
 
 
 class SAEncoder(nn.Module):
@@ -150,7 +159,7 @@ class TransformerEncoderLayer(nn.Module):
             x_v = self.maybe_layer_norm(0, x_v, before=True)
             x, _ = self.self_attn(query=x, key=x_k, value=x_v, attn_mask=mask)
         x = F.dropout(x, p=self.res_dropout, training=self.training)
-        x = residual + x
+        x = residual + x    # residual connection
         x = self.maybe_layer_norm(0, x, after=True)
 
         residual = x
@@ -202,4 +211,7 @@ def LayerNorm(embedding_dim):
 if __name__ == '__main__':
     encoder = SAEncoder(300, 4, 2)
     x = torch.tensor(torch.rand(20, 2, 300))
-    print(encoder(x).shape)
+    x2 = torch.rand(20, 2, 300).clone().detach().requires_grad_(True)
+    print(x)
+    print(x2)
+    print(encoder(x2).shape)

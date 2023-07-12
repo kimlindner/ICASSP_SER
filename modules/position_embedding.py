@@ -68,8 +68,8 @@ class SinusoidalPositionalEmbedding(nn.Module):
                 self.padding_idx,
             )
         self.weights[device] = self.weights[device].type_as(self._float_tensor)
-        positions = make_positions(input_data, self.padding_idx, self.left_pad)
-        return self.weights[device].index_select(0, positions.view(-1)).view(bsz, seq_len, -1).detach()
+        positions = make_positions(input_data, self.padding_idx, self.left_pad) ###
+        return torch.index_select(self.weights[device], 0, positions.reshape(-1)).reshape(bsz, seq_len, -1).detach() ## changed
 
     def max_positions(self):
 

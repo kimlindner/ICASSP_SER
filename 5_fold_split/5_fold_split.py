@@ -22,7 +22,7 @@ def save_k_csv(datas, labels, index):
 
 def k_fold_spilt(k, csv_data, emotion_label):
     split_list = []
-    kf = KFold(n_splits=k)
+    kf = KFold(n_splits=k) ## random state not set (None)
     for train, test in kf.split(csv_data):
         split_list.append(train.tolist())
         split_list.append(test.tolist())

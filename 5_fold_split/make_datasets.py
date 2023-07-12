@@ -5,6 +5,8 @@ import pickle
 import librosa
 import warnings
 import numpy as np
+import sys
+from sklearn import preprocessing
 
 from src.dataset import IEMOCAPDataset
 warnings.filterwarnings('ignore')
@@ -25,12 +27,15 @@ def extract_audio_feat(audio_file):
     :return: extract audio feature.
     """
     y0, sr = librosa.load(audio_file, sr=16000)
-    y = librosa.util.fix_length(y0, sr*10)
+    y = librosa.util.fix_length(y0, size=sr*10) ## wrong size
     spec = librosa.feature.melspectrogram(y=y, sr=sr, n_mels=40)
     log_spec = librosa.core.amplitude_to_db(spec)
     test_feat = np.transpose(log_spec)
 
+    # add sys module change because file cannot be opened with sklearn.preprocessing.data.StandardScaler()
+    sys.modules['sklearn.preprocessing.data'] = preprocessing
     scale_file = pickle.load(open('./CASIA_scaler.pkl', 'rb'))
+    del sys.modules['sklearn.preprocessing.data']
     test_feat_sc = scale_file.transform(test_feat.reshape(-1, test_feat.shape[-1])).reshape(test_feat.shape)
 
     return test_feat_sc
